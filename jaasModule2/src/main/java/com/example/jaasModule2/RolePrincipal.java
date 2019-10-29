@@ -1,4 +1,4 @@
-package com.example.jaas;
+package com.example.jaasModule2;
 
 import java.security.Principal;
 

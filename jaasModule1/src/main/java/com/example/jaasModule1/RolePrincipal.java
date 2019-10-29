@@ -1,12 +1,12 @@
-package com.example.jaas;
+package com.example.jaasModule1;
 
 import java.security.Principal;
 
-public class UserPrincipal implements Principal {
-
+public class RolePrincipal implements Principal {
+	
 	private String name;
 	
-	public UserPrincipal(String name) {
+	public RolePrincipal(String name) {
 		super();
 		this.name = name;
 	}

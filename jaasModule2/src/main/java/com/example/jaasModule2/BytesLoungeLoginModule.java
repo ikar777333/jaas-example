@@ -1,4 +1,4 @@
-package com.example.jaas;
+package com.example.jaasModule2;
 
 import javax.security.auth.Subject;
 import javax.security.auth.callback.Callback;
@@ -15,50 +15,57 @@ import java.util.Map;
 
 public class BytesLoungeLoginModule implements LoginModule {
 
-	private CallbackHandler handler;
+	private CallbackHandler callbackHandler;
 	private Subject subject;
+	Map<String, String> sharedState;
+	Map<String, String> options;
 	private UserPrincipal userPrincipal;
 	private RolePrincipal rolePrincipal;
 	private String login;
 	private List<String> userGroups;
 
-	@Override
-	public void initialize(Subject subject, CallbackHandler callbackHandler,
-			Map<String, ?> sharedState, Map<String, ?> options) {
 
-		handler = callbackHandler;
+	@Override
+	public void initialize(Subject subject, CallbackHandler callbackHandler, Map<String, ?> sharedState, Map<String, ?> options) {
+		this.callbackHandler = callbackHandler;
 		this.subject = subject;
+		this.sharedState = (Map<String, String>) sharedState;
+		this.options = (Map<String, String>) options;
 	}
 
 	@Override
 	public boolean login() throws LoginException {
 
-		Callback[] callbacks = new Callback[2];
-		callbacks[0] = new NameCallback("login");
-		callbacks[1] = new PasswordCallback("password", true);
+		String username = null;
+		String password = null;
 
-		try {
-			handler.handle(callbacks);
-			String name = ((NameCallback) callbacks[0]).getName();
-			String password = String.valueOf(((PasswordCallback) callbacks[1])
-					.getPassword());
-
-			/*if (name != null && name.equals("test") && password != null
-					&& password.equals("test")) {*/
-				login = name;
-				userGroups = new ArrayList<String>();
-				userGroups.add("admin");
-				return true;
-			//}
-
-			//throw new LoginException("Authentication failed");
-
-		} catch (IOException e) {
-			throw new LoginException(e.getMessage());
-		} catch (UnsupportedCallbackException e) {
-			throw new LoginException(e.getMessage());
+		if ("true".equalsIgnoreCase(options.get("useShardState")))
+		{
+			username = (String)sharedState.get("javax.security.auth.login.name");
+			password = (String)sharedState.get("javax.security.auth.login.password");
+		}
+		else
+		{
+			try {
+				Callback[] callbacks = new Callback[2];
+				callbacks[0] = new NameCallback("login");
+				callbacks[1] = new PasswordCallback("password", true);
+				callbackHandler.handle(callbacks);
+				username = ((NameCallback) callbacks[0]).getName();
+				password = String.valueOf(((PasswordCallback) callbacks[1]).getPassword());
+				sharedState.put("javax.security.auth.login.name",username);
+				sharedState.put("javax.security.auth.login.password",password);
+			} catch (IOException e) {
+				throw new LoginException(e.getMessage());
+			} catch (UnsupportedCallbackException e) {
+				throw new LoginException(e.getMessage());
+			}
 		}
 
+		login = username;
+		userGroups = new ArrayList<String>();
+		userGroups.add("admin");
+		return true;
 	}
 
 	@Override
