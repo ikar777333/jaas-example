@@ -39,7 +39,7 @@ public class BytesLoungeLoginModule implements LoginModule {
 		String username = null;
 		String password = null;
 
-		if ("true".equalsIgnoreCase(options.get("useShardState")))
+		if ("true".equalsIgnoreCase(options.get("useSharedState")))
 		{
 			username = (String)sharedState.get("javax.security.auth.login.name");
 			password = (String)sharedState.get("javax.security.auth.login.password");
