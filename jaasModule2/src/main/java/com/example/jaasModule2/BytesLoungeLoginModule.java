@@ -35,11 +35,11 @@ public class BytesLoungeLoginModule implements LoginModule {
 
 	@Override
 	public boolean login() throws LoginException {
-
 		String username = null;
 		String password = null;
 
-		if ("true".equalsIgnoreCase(options.get("useSharedState")))
+		if ("true".equalsIgnoreCase(options.get("useSharedState")) && sharedState.get("javax.security.auth.login.name")!=null
+				&& sharedState.get("javax.security.auth.login.password")!=null)
 		{
 			username = (String)sharedState.get("javax.security.auth.login.name");
 			password = (String)sharedState.get("javax.security.auth.login.password");
@@ -62,6 +62,8 @@ public class BytesLoungeLoginModule implements LoginModule {
 			}
 		}
 
+		sharedState.put("javax.security.auth.login.name",username);
+		sharedState.put("javax.security.auth.login.password",password);
 		login = username;
 		userGroups = new ArrayList<String>();
 		userGroups.add("admin");
@@ -91,6 +93,9 @@ public class BytesLoungeLoginModule implements LoginModule {
 
 	@Override
 	public boolean logout() throws LoginException {
+		this.sharedState.clear();
+		callbackHandler = null;
+		subject = null;
 		subject.getPrincipals().remove(userPrincipal);
 		subject.getPrincipals().remove(rolePrincipal);
 		return true;
